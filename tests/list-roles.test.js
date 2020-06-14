@@ -3,7 +3,7 @@ const { listRoles } = require('../src/lib');
 const fs = require('fs');
 const path = require('path');
 
-const sampleAssertion = fs.readFileSync(path.join(module.path, '/sample-assertion.xml'));
+const sampleAssertion = fs.readFileSync(path.join(__dirname, '/sample-assertion.xml'));
 const sampleAssertionBase64 = Buffer.from(sampleAssertion).toString('base64');
 
 test('parses a valid SAMLResponse', async t => {

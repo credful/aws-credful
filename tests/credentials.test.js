@@ -2,9 +2,14 @@ const test = require('ava');
 const proxyquire = require('proxyquire').noCallThru().noPreserveCache();
 const sinon = require('sinon');
 const path = require('path');
+const { EOL } = require('os');
 
 // Create a multi-platform expectation for testing
 const expectedCredentialsPath = path.join('/home', '.aws', 'credentials');
+
+function platformEol (str) {
+  return str.replace(/\n/g, EOL);
+}
 
 test.beforeEach(t => {
   t.context.stubs = {
@@ -33,24 +38,24 @@ test('writes a profile to an empty credentials file', t => {
   t.context.saveProfile('profile', 'key', 'secret', 'token');
   const [filename, content] = t.context.stubs.fs.writeFileSync.firstCall.args;
   t.is(filename, expectedCredentialsPath);
-  t.is(content, '[profile]\naws_access_key_id=key\naws_secret_access_key=secret\naws_session_token=token\n');
+  t.is(content, platformEol('[profile]\naws_access_key_id=key\naws_secret_access_key=secret\naws_session_token=token\n'));
 });
 
 test('updates an existing profile and leaves extraneous values', t => {
-  t.context.stubs.fs.readFileSync.returns('[profile]\naws_access_key_id=a\naws_secret_access_key=b\naws_session_token=c\nsomething_else=q\n');
+  t.context.stubs.fs.readFileSync.returns(platformEol('[profile]\naws_access_key_id=a\naws_secret_access_key=b\naws_session_token=c\nsomething_else=q\n'));
   t.context.saveProfile('profile', 'key', 'secret', 'token');
   const [filename, content] = t.context.stubs.fs.writeFileSync.firstCall.args;
   t.is(filename, expectedCredentialsPath);
-  t.is(content, '[profile]\naws_access_key_id=key\naws_secret_access_key=secret\naws_session_token=token\nsomething_else=q\n');
+  t.is(content, platformEol('[profile]\naws_access_key_id=key\naws_secret_access_key=secret\naws_session_token=token\nsomething_else=q\n'));
 });
 
 test('adds a profile to an existing file', t => {
-  const profile1 = '[other]\naws_access_key_id=a\naws_secret_access_key=b\naws_session_token=c\n';
+  const profile1 = platformEol('[other]\naws_access_key_id=a\naws_secret_access_key=b\naws_session_token=c\n');
   t.context.stubs.fs.readFileSync.returns(profile1);
   t.context.saveProfile('profile', 'key', 'secret', 'token');
   const [filename, content] = t.context.stubs.fs.writeFileSync.firstCall.args;
   t.is(filename, expectedCredentialsPath);
-  t.is(content, profile1 + '\n[profile]\naws_access_key_id=key\naws_secret_access_key=secret\naws_session_token=token\n');
+  t.is(content, profile1 + platformEol('\n[profile]\naws_access_key_id=key\naws_secret_access_key=secret\naws_session_token=token\n'));
 });
 
 test('gets STS credentials', async t => {
@@ -76,7 +81,7 @@ test('gets STS credentials', async t => {
   t.is(options.SAMLAssertion, 'SAML');
   t.is(options.DurationSeconds, 3600);
   t.is(filename, expectedCredentialsPath);
-  t.is(content, '[profile]\naws_access_key_id=key\naws_secret_access_key=secret\naws_session_token=token\n');
+  t.is(content, platformEol('[profile]\naws_access_key_id=key\naws_secret_access_key=secret\naws_session_token=token\n'));
 });
 
 test('intersects available and desired roles without error', async t => {
@@ -106,5 +111,5 @@ test('intersects available and desired roles without error', async t => {
   t.is(options.SAMLAssertion, 'SAML');
   t.is(options.DurationSeconds, 3600);
   t.is(filename, expectedCredentialsPath);
-  t.is(content, '[profile]\naws_access_key_id=key\naws_secret_access_key=secret\naws_session_token=token\n');
+  t.is(content, platformEol('[profile]\naws_access_key_id=key\naws_secret_access_key=secret\naws_session_token=token\n'));
 });

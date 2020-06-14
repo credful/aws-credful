@@ -1,0 +1,48 @@
+{
+  "name": "aws-credful",
+  "version": "1.0.0",
+  "description": "CLI for obtaining AWS temporary credentials from a SAML browser login",
+  "main": "src/index.js",
+  "bin": {
+    "aws-credful": "run.js"
+  },
+  "scripts": {
+    "start": "electron src/index.js",
+    "test": "nyc ava && semistandard",
+    "watch": "ava --watch",
+    "lint": "semistandard --fix"
+  },
+  "keywords": [
+    "AWS",
+    "Amazon",
+    "SAML",
+    "SSO",
+    "ADFS",
+    "G Suite",
+    "Okta",
+    "Auth0",
+    "Duo",
+    "Shibboleth"
+  ],
+  "author": "Jason Stitt",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=8.0"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.694.0",
+    "electron": "^9.0.3",
+    "home-dir": "^1.0.0",
+    "ini": "^1.3.5",
+    "xml2js": "^0.4.23",
+    "yargs": "^15.3.1"
+  },
+  "devDependencies": {
+    "ava": "^3.8.2",
+    "eslint-config-standard": "^13.0.1",
+    "nyc": "^15.1.0",
+    "proxyquire": "^2.1.3",
+    "semistandard": "^14.2.0",
+    "sinon": "^9.0.2"
+  }
+}

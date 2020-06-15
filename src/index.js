@@ -1,7 +1,7 @@
 const { app } = require('electron');
 const { getArgs, obtainAllCredentials, obtainSaml, listRoles } = require('./lib');
 
-/* istanbul ignore next */
+/* istanbul ignore next - CLI execution only */
 if (app && app.on) {
   app.on('ready', () => main());
 }
@@ -44,7 +44,7 @@ async function main () {
 
     await obtainAllCredentials(roles, outputs, samlResponse, args.hours);
     app.quit();
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) /* istanbul ignore next - just top level error handler */ {
     console.error(err.message);
     process.exit(1);
   }

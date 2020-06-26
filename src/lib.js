@@ -101,9 +101,13 @@ async function listRoles (samlResponse) {
   const decoded = Buffer.from(samlResponse, 'base64').toString();
   const parsed = await parseStringPromise(decoded, { tagNameProcessors: [normalize, stripPrefix] });
   const attributes = parsed.response.assertion[0].attributestatement[0].attribute;
-  const roleAttributes = attributes.filter(x => x.$.Name === awsRoleAttributeName);
-  const roles = roleAttributes.map(attr => {
-    const [roleArn, principalArn] = attr.attributevalue[0]._.split(',');
+  const roleAttribute = attributes.find(x => x.$.Name === awsRoleAttributeName);
+  /* istanbul ignore next - just a top level error */
+  if (!roleAttribute) {
+    throw new Error('No roles found');
+  }
+  const roles = roleAttribute.attributevalue.map(attr => {
+    const [roleArn, principalArn] = attr._.split(',');
     return { roleArn, principalArn };
   });
   return roles;

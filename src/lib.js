@@ -8,6 +8,7 @@ const { session, BrowserWindow } = require('electron');
 const { parseStringPromise } = require('xml2js');
 const { normalize, stripPrefix } = require('xml2js/lib/processors');
 const STS = require('aws-sdk/clients/sts');
+const Promise = require('bluebird');
 
 const awsSamlPage = 'https://signin.aws.amazon.com/saml';
 const awsRoleAttributeName = 'https://aws.amazon.com/SAML/Attributes/Role';
@@ -33,22 +34,26 @@ function getArgs () {
 /* Get STS credentials for all of the outputs based on the same samlResponse and save them all to profiles */
 async function obtainAllCredentials (roles, outputs, samlResponse, hours) {
   const sts = new STS({ connectTimeout: timeout, timeout });
-  for (const { role, profile } of outputs) {
-    const roleObj = roles.find(x => x.roleArn === role);
-    if (!roleObj) {
-      console.error(`Cannot assume role ${role}`);
-      continue;
+  await Promise.map(outputs, async ({ role, profile }) => {
+    try {
+      const roleObj = roles.find(x => x.roleArn === role);
+      if (!roleObj) {
+        console.error(`Cannot assume role ${role}`);
+        return;
+      }
+      const options = {
+        PrincipalArn: roleObj.principalArn,
+        RoleArn: roleObj.roleArn,
+        SAMLAssertion: samlResponse,
+        DurationSeconds: hours * 3600
+      };
+      const creds = (await sts.assumeRoleWithSAML(options).promise()).Credentials;
+      await saveProfile(profile, creds.AccessKeyId, creds.SecretAccessKey, creds.SessionToken);
+      console.error(`Saved profile ${profile}`);
+    } catch (err) /* istanbul ignore next - just error skipping */ {
+      console.error(`${profile}: ${err.message}`);
     }
-    const options = {
-      PrincipalArn: roleObj.principalArn,
-      RoleArn: roleObj.roleArn,
-      SAMLAssertion: samlResponse,
-      DurationSeconds: hours * 3600
-    };
-    const creds = (await sts.assumeRoleWithSAML(options).promise()).Credentials;
-    await saveProfile(profile, creds.AccessKeyId, creds.SecretAccessKey, creds.SessionToken);
-    console.error(`Saved profile ${profile}`);
-  }
+  }, { concurrency: 5 });
 }
 
 /* Save AWS credentials to a named profile in the ~/.aws/credentials file */

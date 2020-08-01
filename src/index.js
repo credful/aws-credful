@@ -27,8 +27,8 @@ async function main () {
     const outputs = [];
     if (args.output && args.output.length) {
       for (const output of args.output) {
-        const [profile, role] = output.split(/:/);
-        outputs.push({ profile, role });
+        const [profile, ...role] = output.split(/:/);
+        outputs.push({ profile, role: role.join(':') });
       }
     } else if (args.all) {
       for (const { roleArn } of roles) {

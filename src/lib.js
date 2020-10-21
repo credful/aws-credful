@@ -86,7 +86,7 @@ function saveProfile (profileName, accessKey, secretKey, sessionToken) {
 /* Pop up a browser window with the startUrl and capture the SAMLResponse to AWS. */
 async function obtainSaml (startUrl) {
   const window = new BrowserWindow(windowSettings);
-  window.loadURL(startUrl, {userAgent: 'Chrome'});
+  window.loadURL(startUrl, { userAgent: 'Chrome' });
   return new Promise((resolve, reject) => {
     session.defaultSession.webRequest.onBeforeRequest({ urls: [awsSamlPage] }, (page, cancel) => {
       try {

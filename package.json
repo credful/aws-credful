@@ -1,6 +1,6 @@
 {
   "name": "aws-credful",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "CLI for obtaining AWS temporary credentials from a SAML browser login",
   "main": "src/index.js",
   "bin": {

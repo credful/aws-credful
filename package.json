@@ -9,8 +9,10 @@
   "scripts": {
     "start": "electron src/index.js",
     "test": "nyc ava && semistandard",
+    "test-only": "nyc ava",
     "watch": "ava --watch",
-    "lint": "semistandard --fix"
+    "lint": "semistandard",
+    "lint-fix": "semistandard --fix"
   },
   "keywords": [
     "AWS",

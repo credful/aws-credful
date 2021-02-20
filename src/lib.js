@@ -12,7 +12,7 @@ const Promise = require('bluebird');
 
 const awsSamlPage = 'https://signin.aws.amazon.com/saml';
 const awsRoleAttributeName = 'https://aws.amazon.com/SAML/Attributes/Role';
-const windowSettings = { width: 450, height: 600, title: 'Sign In' };
+const windowSettings = { width: 450, height: 600, title: 'Sign In', webPreferences: { contextIsolation: true } };
 const timeout = 5000;
 
 /* istanbul ignore next - Process command line arguments */

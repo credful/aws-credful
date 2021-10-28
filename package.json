@@ -50,9 +50,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/aws-credful/aws-credful.git"
+    "url": "https://github.com/credful/aws-credful.git"
   },
-  "homepage": "https://github.com/aws-credful/aws-credful#readme",
+  "homepage": "https://github.com/credful/aws-credful#readme",
   "nyc": {
     "check-coverage": true,
     "lines": 100

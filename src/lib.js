@@ -91,7 +91,6 @@ async function obtainSaml (startUrl) {
     session.defaultSession.webRequest.onBeforeRequest({ urls: [awsSamlPage] }, (page, cancel) => {
       try {
         const data = querystring.parse(page.uploadData[0].bytes.toString());
-        cancel({ cancel: true });
         resolve(data.SAMLResponse);
       } catch (err) {
         reject(err);

@@ -1,6 +1,6 @@
 # AWS CLI creds from any IDP: `aws-credful`
 
-This tool, `aws-credful`, makes it easy to obtain AWS CLI credentials from web browser single sign-on (SSO). Unlike similar tools that support a single identity provider (IDP) such as Microsoft ADFS or Okta, `aws-credful` opens a web browser popup and lets you use basically any IDP that your organization has connected to your AWS accounts. Multiple AWS accounts and roles are also supported (as long as they are set up properly in your IDP).
+This tool, `aws-credful`, makes it easy to obtain AWS CLI credentials from web browser single sign-on (SSO). Unlike similar tools that support a single identity provider (IDP) such as Microsoft ADFS or Okta, `aws-credful` opens a web browser popup and lets you use any IDP that your organization has connected to your AWS accounts. Multiple AWS accounts and roles are also supported (as long as they are set up properly in your IDP).
 
 # Installation
 
@@ -37,6 +37,10 @@ In the past, I've both built and used CLIs for this purpose that make direct HTT
 By popping up a browser window from the CLI, we bypass nearly all of the fragility and just let the browser-based login process be what it wants to be: a browser-based login process.
 
 We also get free cookies (meaning, we're not starting a new blank session every time and can take advantage of session cookies for re-logins). This is especially helpful with G Suite, since it can add a Captcha and email you every time you log into using an unfamiliar device (i.e. one with no cookies). Cookie duration is of course subject to your IDP's limits, just as it would be in a regular web browser.
+
+# Version support
+
+Node 14-18.
 
 # Maintainers
 

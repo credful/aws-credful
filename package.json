@@ -37,7 +37,7 @@
   "dependencies": {
     "aws-sdk": "^2.1253.0",
     "bluebird": "^3.7.2",
-    "electron": "^21.2.3",
+    "electron": "^22.0.0",
     "home-dir": "^1.0.0",
     "ini": "^3.0.1",
     "xml2js": "^0.4.23",

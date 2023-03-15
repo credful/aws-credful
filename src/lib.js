@@ -7,9 +7,8 @@ const yargs = require('yargs');
 const { session, BrowserWindow } = require('electron');
 const { parseStringPromise } = require('xml2js');
 const { normalize, stripPrefix } = require('xml2js/lib/processors');
-const STS = require('aws-sdk/clients/sts');
+const { STS } = require('@aws-sdk/client-sts');
 const Promise = require('bluebird');
-
 const awsSamlPage = 'https://signin.aws.amazon.com/saml';
 const awsRoleAttributeName = 'https://aws.amazon.com/SAML/Attributes/Role';
 const windowSettings = { width: 450, height: 600, title: 'Sign In', webPreferences: { contextIsolation: true } };
@@ -47,7 +46,7 @@ async function obtainAllCredentials (roles, outputs, samlResponse, hours) {
         SAMLAssertion: samlResponse,
         DurationSeconds: hours * 3600
       };
-      const creds = (await sts.assumeRoleWithSAML(options).promise()).Credentials;
+      const creds = (await sts.assumeRoleWithSAML(options)).Credentials;
       await saveProfile(profile, creds.AccessKeyId, creds.SecretAccessKey, creds.SessionToken);
       console.error(`Saved profile ${profile}`);
     } catch (err) /* istanbul ignore next - just error skipping */ {

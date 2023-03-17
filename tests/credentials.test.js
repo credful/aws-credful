@@ -19,9 +19,9 @@ test.beforeEach(t => {
       mkdirSync: sinon.spy()
     },
     'home-dir': () => '/home',
-    'aws-sdk/clients/sts': function () {}
+    '@aws-sdk/client-sts': { STS: function () {} }
   };
-  t.context.assumeRoleWithSAML = t.context.stubs['aws-sdk/clients/sts'].prototype.assumeRoleWithSAML = sinon.stub();
+  t.context.assumeRoleWithSAML = t.context.stubs['@aws-sdk/client-sts'].STS.prototype.assumeRoleWithSAML = sinon.stub();
   const lib = proxyquire('../src/lib', t.context.stubs);
   t.context.saveProfile = lib.saveProfile;
   t.context.obtainAllCredentials = lib.obtainAllCredentials;
@@ -60,15 +60,14 @@ test('adds a profile to an existing file', t => {
 
 test('gets STS credentials', async t => {
   t.context.stubs.fs.readFileSync.returns('');
-  t.context.assumeRoleWithSAML.returns({
-    promise: () => ({
-      Credentials: {
-        AccessKeyId: 'key',
-        SecretAccessKey: 'secret',
-        SessionToken: 'token'
-      }
-    })
-  });
+  t.context.assumeRoleWithSAML.returns(Promise.resolve({
+    Credentials: {
+      AccessKeyId: 'key',
+      SecretAccessKey: 'secret',
+      SessionToken: 'token'
+    }
+  })
+  );
   const roles = [{ roleArn: 'XXX', principalArn: 'YYY' }];
   const outputs = [{ role: 'XXX', profile: 'profile' }];
   const samlResponse = 'SAML';
@@ -86,15 +85,14 @@ test('gets STS credentials', async t => {
 
 test('intersects available and desired roles without error', async t => {
   t.context.stubs.fs.readFileSync.returns('');
-  t.context.assumeRoleWithSAML.returns({
-    promise: () => ({
-      Credentials: {
-        AccessKeyId: 'key',
-        SecretAccessKey: 'secret',
-        SessionToken: 'token'
-      }
-    })
-  });
+  t.context.assumeRoleWithSAML.returns(Promise.resolve({
+    Credentials: {
+      AccessKeyId: 'key',
+      SecretAccessKey: 'secret',
+      SessionToken: 'token'
+    }
+  })
+  );
   const roles = [
     { roleArn: 'XXX', principalArn: 'YYY' },
     { roleArn: 'AAA', principalArn: 'BBB' },

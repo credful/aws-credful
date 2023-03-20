@@ -32,7 +32,7 @@ function getArgs () {
 
 /* Get STS credentials for all of the outputs based on the same samlResponse and save them all to profiles */
 async function obtainAllCredentials (roles, outputs, samlResponse, hours) {
-  const sts = new STS({ connectTimeout: timeout, timeout });
+  const sts = new STS({ connectTimeout: timeout, timeout, region: 'us-east-1' });
   await Promise.map(outputs, async ({ role, profile }) => {
     try {
       const roleObj = roles.find(x => x.roleArn === role);

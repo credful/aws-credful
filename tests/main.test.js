@@ -12,7 +12,8 @@ test.beforeEach(t => {
     obtainSaml: sinon.stub().resolves(''),
     listRoles: sinon.stub(),
     getConfig: sinon.stub(),
-    obtainAllCredentials: sinon.stub()
+    obtainAllCredentials: sinon.stub(),
+    getDefaultRegion: sinon.stub(),
   };
   t.context.stubs = {
     electron: {
@@ -77,4 +78,3 @@ test('outputs all roles', async t => {
     'us-east-1'
   ]);
 });
-

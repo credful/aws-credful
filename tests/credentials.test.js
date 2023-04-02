@@ -4,8 +4,6 @@ const sinon = require('sinon');
 const path = require('path');
 const { EOL } = require('os');
 
-// Create a multi-platform expectation for testing
-const expectedConfigPath = path.join('/home', '.aws', 'config');
 const expectedCredentialsPath = path.join('/home', '.aws', 'credentials');
 
 function platformEol (str) {

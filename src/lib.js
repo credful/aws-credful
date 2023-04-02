@@ -8,6 +8,7 @@ const { session, BrowserWindow } = require('electron');
 const { parseStringPromise } = require('xml2js');
 const { normalize, stripPrefix } = require('xml2js/lib/processors');
 const { STS } = require('@aws-sdk/client-sts');
+const { loadSharedConfigFiles } = require('@aws-sdk/shared-ini-file-loader');
 const Promise = require('bluebird');
 const awsSamlPage = 'https://signin.aws.amazon.com/saml';
 const awsRoleAttributeName = 'https://aws.amazon.com/SAML/Attributes/Role';
@@ -18,7 +19,7 @@ const timeout = 5000;
 function getArgs () {
   return (yargs
     .option('url', { alias: 'u', type: 'string', description: 'URL that starts your single-sign on process to AWS in the browser (or set AWS_CREDFUL_URL)' })
-    .option('region', { alias: 'r', type: 'string', description: 'AWS region to use for STS requests, if not passed or configured default is used', default: 'us-east-1' })
+    .option('region', { alias: 'r', type: 'string', description: 'AWS region to use for STS requests. Falls back to AWS_REGION, default profile, then us-east-1.' })
     .option('output', { alias: 'o', type: 'array', description: '<profile name>:<role arn> - you can specify this argument multiple times for multiple profiles' })
     .option('all', { type: 'boolean', description: 'Instead of outputs, save all roles, using role name as profile name. Does not dedupe role names' })
     .option('list-roles', { type: 'boolean', description: 'Just list the available roles and quit' })
@@ -67,6 +68,14 @@ function getConfig ({ profileName, accessKey, secretKey, sessionToken, file, reg
   }
   config[profileName] = Object.assign({}, config[profileName], value);
   return { config, credentialsPath };
+}
+
+async function getDefaultRegion () {
+  if (process.env.AWS_REGION) {
+    return process.env.AWS_REGION;
+  }
+  const { configFile } = await loadSharedConfigFiles();
+  return configFile?.default?.region;
 }
 
 /* Get STS credentials for all of the outputs based on the same samlResponse and save them all to profiles */
@@ -138,6 +147,7 @@ async function listRoles (samlResponse) {
 module.exports = {
   getArgs,
   obtainAllCredentials,
+  getDefaultRegion,
   saveProfile,
   obtainSaml,
   listRoles

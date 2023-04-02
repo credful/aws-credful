@@ -18,6 +18,7 @@ const timeout = 5000;
 function getArgs () {
   return (yargs
     .option('url', { alias: 'u', type: 'string', description: 'URL that starts your single-sign on process to AWS in the browser (or set AWS_CREDFUL_URL)' })
+    .option('region', { alias: 'r', type: 'string', description: 'AWS region to use for STS requests, if not passed or configured default is used', default: 'us-east-1' })
     .option('output', { alias: 'o', type: 'array', description: '<profile name>:<role arn> - you can specify this argument multiple times for multiple profiles' })
     .option('all', { type: 'boolean', description: 'Instead of outputs, save all roles, using role name as profile name. Does not dedupe role names' })
     .option('list-roles', { type: 'boolean', description: 'Just list the available roles and quit' })
@@ -30,9 +31,48 @@ function getArgs () {
     .parse());
 }
 
+function getConfig ({ profileName, accessKey, secretKey, sessionToken, file, region, output }) {
+  let value;
+
+  if (file === 'credentials') {
+    value = {
+      aws_access_key_id: accessKey,
+      aws_secret_access_key: secretKey,
+      aws_session_token: sessionToken
+    };
+  } else if (file === 'config') {
+    value = {
+      region,
+      output
+    };
+  }
+
+  const awsPath = path.join(homedir(), '.aws');
+  try {
+    fs.mkdirSync(awsPath);
+  } catch (err) /* istanbul ignore next - just error propagation */ {
+    if (err.code !== 'EEXIST') {
+      console.log('error', err);
+      throw err;
+    }
+  }
+  const credentialsPath = path.join(awsPath, file);
+  let config = {};
+  try {
+    config = ini.parse(fs.readFileSync(credentialsPath, 'utf-8'));
+  } catch (err) /* istanbul ignore next - just error propagation */ {
+    if (err.code !== 'ENOENT') {
+      throw err;
+    }
+  }
+  config[profileName] = Object.assign({}, config[profileName], value);
+  return { config, credentialsPath };
+}
+
 /* Get STS credentials for all of the outputs based on the same samlResponse and save them all to profiles */
-async function obtainAllCredentials (roles, outputs, samlResponse, hours) {
-  const sts = new STS({ connectTimeout: timeout, timeout, region: 'us-east-1' });
+async function obtainAllCredentials (roles, outputs, samlResponse, hours, region) {
+  const { config } = getConfig({ profile: 'defualt', file: 'config' });
+  const sts = new STS({ connectTimeout: timeout, timeout, region: region || config.default.region || 'us-east-1' });
   await Promise.map(outputs, async ({ role, profile }) => {
     try {
       const roleObj = roles.find(x => x.roleArn === role);
@@ -57,28 +97,7 @@ async function obtainAllCredentials (roles, outputs, samlResponse, hours) {
 
 /* Save AWS credentials to a named profile in the ~/.aws/credentials file */
 function saveProfile (profileName, accessKey, secretKey, sessionToken) {
-  const awsPath = path.join(homedir(), '.aws');
-  try {
-    fs.mkdirSync(awsPath);
-  } catch (err) /* istanbul ignore next - just error propagation */ {
-    if (err.code !== 'EEXIST') {
-      throw err;
-    }
-  }
-  const credentialsPath = path.join(awsPath, 'credentials');
-  let config = {};
-  try {
-    config = ini.parse(fs.readFileSync(credentialsPath, 'utf-8'));
-  } catch (err) /* istanbul ignore next - just error propagation */ {
-    if (err.code !== 'ENOENT') {
-      throw err;
-    }
-  }
-  config[profileName] = Object.assign({}, config[profileName], {
-    aws_access_key_id: accessKey,
-    aws_secret_access_key: secretKey,
-    aws_session_token: sessionToken
-  });
+  const { config, credentialsPath } = getConfig({ profileName, accessKey, secretKey, sessionToken, file: 'credentials' });
   fs.writeFileSync(credentialsPath, ini.stringify(config));
 }
 

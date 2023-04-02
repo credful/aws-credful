@@ -5,6 +5,7 @@ const path = require('path');
 const { EOL } = require('os');
 
 // Create a multi-platform expectation for testing
+const expectedConfigPath = path.join('/home', '.aws', 'config');
 const expectedCredentialsPath = path.join('/home', '.aws', 'credentials');
 
 function platformEol (str) {
@@ -72,7 +73,8 @@ test('gets STS credentials', async t => {
   const outputs = [{ role: 'XXX', profile: 'profile' }];
   const samlResponse = 'SAML';
   const hours = 1;
-  await t.context.obtainAllCredentials(roles, outputs, samlResponse, hours);
+  const region = 'us-east-1';
+  await t.context.obtainAllCredentials(roles, outputs, samlResponse, hours, region);
   const [options] = t.context.assumeRoleWithSAML.firstCall.args;
   const [filename, content] = t.context.stubs.fs.writeFileSync.firstCall.args;
   t.is(options.RoleArn, 'XXX');
@@ -85,13 +87,14 @@ test('gets STS credentials', async t => {
 
 test('intersects available and desired roles without error', async t => {
   t.context.stubs.fs.readFileSync.returns('');
-  t.context.assumeRoleWithSAML.returns(Promise.resolve({
-    Credentials: {
-      AccessKeyId: 'key',
-      SecretAccessKey: 'secret',
-      SessionToken: 'token'
-    }
-  })
+  t.context.assumeRoleWithSAML.returns(
+    Promise.resolve({
+      Credentials: {
+        AccessKeyId: 'key',
+        SecretAccessKey: 'secret',
+        SessionToken: 'token'
+      }
+    })
   );
   const roles = [
     { roleArn: 'XXX', principalArn: 'YYY' },
@@ -101,7 +104,8 @@ test('intersects available and desired roles without error', async t => {
   const outputs = [{ role: 'XXX', profile: 'profile' }, { role: 'NOPE', profile: 'profile2' }];
   const samlResponse = 'SAML';
   const hours = 1;
-  await t.context.obtainAllCredentials(roles, outputs, samlResponse, hours);
+  const region = 'us-east-1';
+  await t.context.obtainAllCredentials(roles, outputs, samlResponse, hours, region);
   const [options] = t.context.assumeRoleWithSAML.firstCall.args;
   const [filename, content] = t.context.stubs.fs.writeFileSync.firstCall.args;
   t.is(options.RoleArn, 'XXX');

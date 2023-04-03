@@ -32,22 +32,7 @@ function getArgs () {
     .parse());
 }
 
-function getConfig ({ profileName, accessKey, secretKey, sessionToken, file, region, output }) {
-  let value;
-
-  if (file === 'credentials') {
-    value = {
-      aws_access_key_id: accessKey,
-      aws_secret_access_key: secretKey,
-      aws_session_token: sessionToken
-    };
-  } else if (file === 'config') {
-    value = {
-      region,
-      output
-    };
-  }
-
+function getConfig ({ profileName, accessKey, secretKey, sessionToken }) {
   const awsPath = path.join(homedir(), '.aws');
   try {
     fs.mkdirSync(awsPath);
@@ -57,7 +42,7 @@ function getConfig ({ profileName, accessKey, secretKey, sessionToken, file, reg
       throw err;
     }
   }
-  const credentialsPath = path.join(awsPath, file);
+  const credentialsPath = path.join(awsPath, 'credentials');
   let config = {};
   try {
     config = ini.parse(fs.readFileSync(credentialsPath, 'utf-8'));
@@ -66,7 +51,12 @@ function getConfig ({ profileName, accessKey, secretKey, sessionToken, file, reg
       throw err;
     }
   }
-  config[profileName] = Object.assign({}, config[profileName], value);
+  const profileCredentials = {
+    aws_access_key_id: accessKey,
+    aws_secret_access_key: secretKey,
+    aws_session_token: sessionToken
+  };
+  config[profileName] = Object.assign({}, config[profileName], profileCredentials);
   return { config, credentialsPath };
 }
 
@@ -80,8 +70,7 @@ async function getDefaultRegion () {
 
 /* Get STS credentials for all of the outputs based on the same samlResponse and save them all to profiles */
 async function obtainAllCredentials (roles, outputs, samlResponse, hours, region) {
-  const { config } = getConfig({ profile: 'defualt', file: 'config' });
-  const sts = new STS({ connectTimeout: timeout, timeout, region: region || config.default.region || 'us-east-1' });
+  const sts = new STS({ connectTimeout: timeout, timeout, region });
   await Promise.map(outputs, async ({ role, profile }) => {
     try {
       const roleObj = roles.find(x => x.roleArn === role);
@@ -106,7 +95,7 @@ async function obtainAllCredentials (roles, outputs, samlResponse, hours, region
 
 /* Save AWS credentials to a named profile in the ~/.aws/credentials file */
 function saveProfile (profileName, accessKey, secretKey, sessionToken) {
-  const { config, credentialsPath } = getConfig({ profileName, accessKey, secretKey, sessionToken, file: 'credentials' });
+  const { config, credentialsPath } = getConfig({ profileName, accessKey, secretKey, sessionToken });
   fs.writeFileSync(credentialsPath, ini.stringify(config));
 }
 

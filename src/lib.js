@@ -32,7 +32,8 @@ function getArgs () {
     .parse());
 }
 
-function getConfig ({ profileName, accessKey, secretKey, sessionToken }) {
+/* Retrieve a profile from AWS' credentials INI file with some credentials added. */
+function getModifiedConfig ({ profileName, accessKey, secretKey, sessionToken }) {
   const awsPath = path.join(homedir(), '.aws');
   try {
     fs.mkdirSync(awsPath);
@@ -60,6 +61,8 @@ function getConfig ({ profileName, accessKey, secretKey, sessionToken }) {
   return { config, credentialsPath };
 }
 
+/* Get the region from the standard env var or config file used by the AWS SDK/CLI, but allow an undefined
+result that must be defaulted elsewhere. */
 async function getDefaultRegion () {
   if (process.env.AWS_REGION) {
     return process.env.AWS_REGION;
@@ -95,7 +98,7 @@ async function obtainAllCredentials (roles, outputs, samlResponse, hours, region
 
 /* Save AWS credentials to a named profile in the ~/.aws/credentials file */
 function saveProfile (profileName, accessKey, secretKey, sessionToken) {
-  const { config, credentialsPath } = getConfig({ profileName, accessKey, secretKey, sessionToken });
+  const { config, credentialsPath } = getModifiedConfig({ profileName, accessKey, secretKey, sessionToken });
   fs.writeFileSync(credentialsPath, ini.stringify(config));
 }
 

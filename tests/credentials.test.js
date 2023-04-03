@@ -5,12 +5,15 @@ const path = require('path');
 const { EOL } = require('os');
 
 const expectedCredentialsPath = path.join('/home', '.aws', 'credentials');
+let loadSharedConfigFilesResp;
 
 function platformEol (str) {
   return str.replace(/\n/g, EOL);
 }
 
 test.beforeEach(t => {
+  loadSharedConfigFilesResp = {};
+  process.env = {};
   t.context.stubs = {
     fs: {
       readFileSync: sinon.stub(),
@@ -18,12 +21,14 @@ test.beforeEach(t => {
       mkdirSync: sinon.spy()
     },
     'home-dir': () => '/home',
-    '@aws-sdk/client-sts': { STS: function () {} }
+    '@aws-sdk/client-sts': { STS: function () {} },
+    '@aws-sdk/shared-ini-file-loader': { loadSharedConfigFiles: async () => (loadSharedConfigFilesResp) }
   };
   t.context.assumeRoleWithSAML = t.context.stubs['@aws-sdk/client-sts'].STS.prototype.assumeRoleWithSAML = sinon.stub();
   const lib = proxyquire('../src/lib', t.context.stubs);
   t.context.saveProfile = lib.saveProfile;
   t.context.obtainAllCredentials = lib.obtainAllCredentials;
+  t.context.getDefaultRegion = lib.getDefaultRegion;
 });
 
 test('creates .aws directory', t => {
@@ -112,4 +117,18 @@ test('intersects available and desired roles without error', async t => {
   t.is(options.DurationSeconds, 3600);
   t.is(filename, expectedCredentialsPath);
   t.is(content, platformEol('[profile]\naws_access_key_id=key\naws_secret_access_key=secret\naws_session_token=token\n'));
+});
+
+test('falls through default region', async t => {
+  t.is(await t.context.getDefaultRegion(), undefined);
+});
+
+test.serial('gets default region from env', async t => {
+  process.env.AWS_REGION = 'test-region-1';
+  t.is(await t.context.getDefaultRegion(), 'test-region-1');
+});
+
+test('gets default region from config ini file', async t => {
+  loadSharedConfigFilesResp = { configFile: { default: { region: 'test-region-2' } } };
+  t.is(await t.context.getDefaultRegion(), 'test-region-2');
 });

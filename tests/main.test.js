@@ -13,7 +13,7 @@ test.beforeEach(t => {
     listRoles: sinon.stub(),
     getConfig: sinon.stub(),
     obtainAllCredentials: sinon.stub(),
-    getDefaultRegion: sinon.stub(),
+    getDefaultRegion: sinon.stub()
   };
   t.context.stubs = {
     electron: {

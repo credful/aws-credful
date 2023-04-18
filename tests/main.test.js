@@ -11,7 +11,9 @@ test.beforeEach(t => {
     getArgs: sinon.stub(),
     obtainSaml: sinon.stub().resolves(''),
     listRoles: sinon.stub(),
-    obtainAllCredentials: sinon.stub()
+    getConfig: sinon.stub(),
+    obtainAllCredentials: sinon.stub(),
+    getDefaultRegion: sinon.stub()
   };
   t.context.stubs = {
     electron: {
@@ -48,7 +50,7 @@ test('exist if no outputs', async t => {
 });
 
 test('outputs specified roles', async t => {
-  t.context.lib.getArgs.returns({ url: 'https://example.com', output: ['profile:XXX'], hours: 1 });
+  t.context.lib.getArgs.returns({ url: 'https://example.com', output: ['profile:XXX'], hours: 1, region: 'us-east-1' });
   t.context.lib.listRoles.returns([{ roleArn: 'XXX', principalArn: 'YYY' }]);
   await t.context.main();
   t.truthy(t.context.stubs.electron.app.quit.called);
@@ -57,12 +59,13 @@ test('outputs specified roles', async t => {
     [{ roleArn: 'XXX', principalArn: 'YYY' }],
     [{ role: 'XXX', profile: 'profile' }],
     '',
-    1
+    1,
+    'us-east-1'
   ]);
 });
 
 test('outputs all roles', async t => {
-  t.context.lib.getArgs.returns({ url: 'https://example.com', all: true, hours: 1 });
+  t.context.lib.getArgs.returns({ url: 'https://example.com', all: true, hours: 1, region: 'us-east-1' });
   t.context.lib.listRoles.returns([{ roleArn: 'role/XXX', principalArn: 'YYY' }, { roleArn: 'role/AAA', principalArn: 'BBB' }]);
   await t.context.main();
   t.truthy(t.context.stubs.electron.app.quit.called);
@@ -71,6 +74,7 @@ test('outputs all roles', async t => {
     [{ roleArn: 'role/XXX', principalArn: 'YYY' }, { roleArn: 'role/AAA', principalArn: 'BBB' }],
     [{ role: 'role/XXX', profile: 'XXX' }, { role: 'role/AAA', profile: 'AAA' }],
     '',
-    1
+    1,
+    'us-east-1'
   ]);
 });

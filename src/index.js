@@ -1,5 +1,5 @@
 const { app } = require('electron');
-const { getArgs, obtainAllCredentials, obtainSaml, listRoles } = require('./lib');
+const { getArgs, obtainAllCredentials, obtainSaml, listRoles, getDefaultRegion } = require('./lib');
 
 /* istanbul ignore next - CLI execution only */
 if (app && app.on) {
@@ -11,6 +11,7 @@ async function main () {
     const args = getArgs();
 
     const startUrl = args.url || process.env.AWS_CREDFUL_URL;
+    const region = args.region || await getDefaultRegion() || 'us-east-1';
     if (!startUrl) {
       console.error('No URL specified');
       return app.quit();
@@ -42,7 +43,7 @@ async function main () {
       return app.quit();
     }
 
-    await obtainAllCredentials(roles, outputs, samlResponse, args.hours);
+    await obtainAllCredentials(roles, outputs, samlResponse, args.hours, region);
     app.quit();
   } catch (err) /* istanbul ignore next - just top level error handler */ {
     console.error(err.message);

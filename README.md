@@ -40,7 +40,7 @@ We also get free cookies (meaning, we're not starting a new blank session every 
 
 # Version support
 
-Node 14-18.
+Node 16-20.
 
 # Maintainers
 

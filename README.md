@@ -1,6 +1,6 @@
 # `aws-credful`: AWS CLI credentials from browser single sign-on
 
-![Coveralls](https://img.shields.io/coverallsCoverage/github/credful/aws-credful)
+![Coveralls](https://img.shields.io/coverallsCoverage/github/credful/aws-credful?style=for-the-badge) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/credful/aws-credful/test.yaml?style=for-the-badge) ![NPM Version](https://img.shields.io/npm/v/aws-credful?style=for-the-badge)
 
 `aws-credful` makes it easy to obtain AWS CLI credentials from web browser single sign-on (SSO). Unlike similar tools that support a single identity provider (IDP) such as Microsoft ADFS or Okta, `aws-credful` opens a web browser popup and lets you use any IDP that your organization has connected to your AWS accounts.
 

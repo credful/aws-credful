@@ -8,6 +8,8 @@ Multiple AWS accounts and roles are also supported (as long as they are set up p
 
 `aws-credful` is for use with role-based SAML federation in AWS IAM, not with the AWS SSO product.
 
+Also see the blog post, [Complete AWS SAML setup using Terraform and aws-credful](https://jasonstitt.com/aws-saml-terraform).
+
 ## 📦 Installation
 
 ```
